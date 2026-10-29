@@ -9,6 +9,25 @@ jobs:
   checks:
     name: Lint, typecheck, test, build
     runs-on: ubuntu-latest
+    # Only the "Unit/integration tests" step below needs a live database
+    # (the Prisma integration tests in tests/prisma.integration.test.ts);
+    # lint/typecheck/build don't touch it.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: winwin
+          POSTGRES_PASSWORD: winwin
+          POSTGRES_DB: winwin
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: "postgresql://winwin:winwin@localhost:5432/winwin?schema=public"
     steps:
       - uses: actions/checkout@v4
 
@@ -25,6 +44,9 @@ jobs:
 
       - name: Typecheck
         run: npm run typecheck
+
+      - name: Apply database migrations
+        run: npx prisma migrate deploy
 
       - name: Unit/integration tests
         run: npm run test

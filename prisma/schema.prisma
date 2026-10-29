@@ -1,0 +1,124 @@
+// Prisma schema for Win-Win Approach.
+//
+// Spec: specs/active/0002-core-domain-model.md
+//
+// Modeling decision — InformationPage vs InformationVersion:
+// There is no separate `InformationPage` table. The "current" Information
+// page is simply the `InformationVersion` with `status = PUBLISHED` and the
+// most recent `publishedAt`. A real singleton table would add a second
+// source of truth to keep in sync with version history for no benefit at
+// this scale, and the MVP doesn't need page-level metadata that wouldn't
+// belong on a version anyway. If a future spec needs page-level concerns
+// that don't fit a version (e.g. page-level SEO settings), add a dedicated
+// table then.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// Authenticated roles. VISITOR (unauthenticated) is implicit and not
+/// stored here — a row only exists for users who have signed up.
+enum Role {
+  MEMBER
+  EXPERT
+  ADMIN
+}
+
+enum InformationStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum ProposalStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  // Nullable: real hashing/auth-provider wiring arrives with spec 0003.
+  passwordHash String?
+  displayName  String
+  role         Role
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  authoredVersions   InformationVersion[] @relation("InformationVersionAuthor")
+  createdThreads     Thread[]             @relation("ThreadCreatedBy")
+  posts              Post[]               @relation("PostAuthor")
+  submittedProposals Proposal[]           @relation("ProposalSubmittedBy")
+  reviewedProposals  Proposal[]           @relation("ProposalReviewedBy")
+}
+
+model InformationVersion {
+  id           String             @id @default(cuid())
+  versionLabel String
+  title        String
+  body         String
+  status       InformationStatus  @default(DRAFT)
+  publishedAt  DateTime?
+  authorId     String
+  author       User               @relation("InformationVersionAuthor", fields: [authorId], references: [id])
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  threads   Thread[]
+  proposals Proposal[] @relation("ProposalTargetVersion")
+
+  // Used to find "the current page" (latest PUBLISHED version) and to list
+  // version history by status.
+  @@index([status])
+}
+
+model Thread {
+  id                   String              @id @default(cuid())
+  title                String
+  createdById          String
+  createdBy            User                @relation("ThreadCreatedBy", fields: [createdById], references: [id])
+  informationVersionId String?
+  informationVersion   InformationVersion? @relation(fields: [informationVersionId], references: [id])
+  createdAt            DateTime            @default(now())
+
+  posts Post[]
+
+  @@index([informationVersionId])
+}
+
+model Post {
+  id        String   @id @default(cuid())
+  threadId  String
+  thread    Thread   @relation(fields: [threadId], references: [id])
+  authorId  String
+  author    User     @relation("PostAuthor", fields: [authorId], references: [id])
+  body      String
+  createdAt DateTime @default(now())
+
+  @@index([threadId])
+}
+
+model Proposal {
+  id              String         @id @default(cuid())
+  submittedById   String
+  submittedBy     User           @relation("ProposalSubmittedBy", fields: [submittedById], references: [id])
+  // Nullable: a proposal may suggest net-new content with no existing
+  // version to target.
+  targetVersionId String?
+  targetVersion   InformationVersion? @relation("ProposalTargetVersion", fields: [targetVersionId], references: [id])
+  proposedBody    String
+  status          ProposalStatus @default(PENDING)
+  reviewedById    String?
+  reviewedBy      User?          @relation("ProposalReviewedBy", fields: [reviewedById], references: [id])
+  reviewNote      String?
+  createdAt       DateTime       @default(now())
+  reviewedAt      DateTime?
+
+  @@index([status])
+}

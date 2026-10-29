@@ -1,6 +1,6 @@
 # 0002 — Core domain model (Prisma schema)
 
-**Status:** Backlog
+**Status:** Active
 **Depends on:** 0001
 
 ## Context / why
@@ -46,7 +46,7 @@ model. Defining it once, deliberately, avoids painful migrations later.
 
 ## Data model changes
 
-As described above — this spec *is* the data model change.
+As described above — this spec _is_ the data model change.
 
 ## User-facing behavior
 

@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: winwin
+      POSTGRES_PASSWORD: winwin
+      POSTGRES_DB: winwin
+    ports:
+      - "5432:5432"
+    volumes:
+      - winwin-postgres-data:/var/lib/postgresql/data
+
+volumes:
+  winwin-postgres-data:
