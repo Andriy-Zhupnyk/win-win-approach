@@ -1,6 +1,6 @@
 # 0001 — Project scaffold & quality gates
 
-**Status:** Active
+**Status:** Done (merged in #1)
 **Depends on:** —
 
 ## Context / why
