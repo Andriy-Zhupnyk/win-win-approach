@@ -8,7 +8,7 @@
 import { randomUUID } from "node:crypto";
 import { PrismaClient, Role } from "@prisma/client";
 import { afterAll, describe, expect, it } from "vitest";
-import { registerAction } from "@/app/register/actions";
+import { registerAction } from "@/app/[locale]/register/actions";
 
 const prisma = new PrismaClient();
 const runId = randomUUID().slice(0, 8);
@@ -18,6 +18,11 @@ const createdEmails: string[] = [];
 
 function formDataFor(fields: Record<string, string>) {
   const formData = new FormData();
+  // Server Actions don't infer a request locale on their own (see the
+  // comment in app/[locale]/register/actions.ts); fix it to "en" so these
+  // assertions on the English error copy stay deterministic regardless of
+  // the app's default locale.
+  formData.set("locale", "en");
   for (const [key, value] of Object.entries(fields)) {
     formData.set(key, value);
   }

@@ -1,0 +1,68 @@
+{
+  "common": {
+    "siteName": "Win-Win Approach",
+    "description": "A discussion platform for socioeconomic issues: Information, Discussion, Research, Modelling, Real-World Projects."
+  },
+  "nav": {
+    "login": "Log in",
+    "register": "Register",
+    "account": "Account",
+    "admin": "Admin",
+    "logout": "Log out"
+  },
+  "localeSwitcher": {
+    "label": "Language"
+  },
+  "home": {
+    "title": "Win-Win Approach",
+    "subtitle": "Coming soon."
+  },
+  "auth": {
+    "login": {
+      "heading": "Log in",
+      "noAccount": "No account?",
+      "registerLink": "Register",
+      "emailLabel": "Email",
+      "passwordLabel": "Password",
+      "submit": "Log in",
+      "submitting": "Logging in…",
+      "invalidCredentials": "Invalid email or password."
+    },
+    "register": {
+      "heading": "Register",
+      "haveAccount": "Already have an account?",
+      "loginLink": "Log in",
+      "displayNameLabel": "Display name",
+      "emailLabel": "Email",
+      "passwordLabel": "Password",
+      "submit": "Register",
+      "submitting": "Creating account…",
+      "success": "Account created. You can now",
+      "loginNow": "log in",
+      "errors": {
+        "displayNameRequired": "Enter a display name.",
+        "invalidEmail": "Enter a valid email address.",
+        "passwordTooShort": "Password must be at least {min} characters.",
+        "emailTaken": "An account with this email already exists."
+      }
+    }
+  },
+  "account": {
+    "heading": "Account",
+    "signedInAs": "Signed in with role {role}. Profile editing arrives in a later spec.",
+    "roles": {
+      "VISITOR": "Visitor",
+      "MEMBER": "Member",
+      "EXPERT": "Expert",
+      "ADMIN": "Administrator"
+    }
+  },
+  "admin": {
+    "heading": "Admin",
+    "comingLater": "Content management arrives in a later spec."
+  },
+  "forbidden": {
+    "heading": "Forbidden",
+    "message": "You do not have permission to view this page."
+  }
+}
