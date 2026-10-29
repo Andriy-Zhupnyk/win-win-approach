@@ -17,13 +17,14 @@ without a spec, politely point them back to the spec workflow.
 following the pipeline: **Information → Discussion → Research → Modelling →
 Real-World Projects**.
 
-**Current scope (MVP):** only the *Information* and *Discussion* stages are
+**Current scope (MVP):** only the _Information_ and _Discussion_ stages are
 built now. Research / Modelling / Real-World Projects are future stages —
 the data model and routing should not actively block adding them later, but
 do not build speculative code for them now (no empty placeholder modules,
 no "future-proof" abstractions without a concrete spec).
 
 Core capabilities of the MVP:
+
 - Public, unauthenticated read access to the Information page.
 - Auth with roles: `visitor`, `member`, `expert`, `administrator` (more roles
   may be added later — role is a string/enum column, not a hardcoded set of
@@ -37,20 +38,20 @@ Core capabilities of the MVP:
 
 ## 2. Tech stack (pinned — do not substitute without updating this file)
 
-| Layer | Choice |
-|---|---|
-| Framework | Next.js (App Router), TypeScript, `strict: true` |
-| Styling | Tailwind CSS |
-| Database | PostgreSQL (Neon for local/dev/demo) |
-| ORM | Prisma |
-| Auth | Auth.js (NextAuth v5) + Prisma adapter |
-| i18n | next-intl |
-| Unit tests | Vitest |
-| E2E tests | Playwright |
-| Lint/format | ESLint (typescript-eslint) + Prettier |
-| Git hooks | Husky + lint-staged |
-| CI | GitHub Actions |
-| Hosting (demo) | Vercel |
+| Layer          | Choice                                           |
+| -------------- | ------------------------------------------------ |
+| Framework      | Next.js (App Router), TypeScript, `strict: true` |
+| Styling        | Tailwind CSS                                     |
+| Database       | PostgreSQL (Neon for local/dev/demo)             |
+| ORM            | Prisma                                           |
+| Auth           | Auth.js (NextAuth v5) + Prisma adapter           |
+| i18n           | next-intl                                        |
+| Unit tests     | Vitest                                           |
+| E2E tests      | Playwright                                       |
+| Lint/format    | ESLint (typescript-eslint) + Prettier            |
+| Git hooks      | Husky + lint-staged                              |
+| CI             | GitHub Actions                                   |
+| Hosting (demo) | Vercel                                           |
 
 Do not add a new framework-level dependency (new ORM, new auth lib, new CSS
 approach, a second UI framework, etc.) without first proposing it as a spec.
@@ -93,6 +94,35 @@ if CI is red. Do not weaken a gate (e.g. disable an ESLint rule, add
 `// @ts-ignore`, skip a failing test) to make it pass — fix the root cause,
 or if the rule is genuinely wrong, propose the change explicitly in the PR
 description.
+
+### 4.1 Lockfile hygiene (read this before touching dependencies)
+
+This has broken CI twice already, on this exact project, from the exact same
+cause — treat this as load-bearing, not advisory:
+
+- **Never run plain `npm install` to "fix" or refresh `package-lock.json` on a
+  Windows dev machine.** Even with an empty `node_modules/`, a plain
+  `npm install` against an _existing_ lockfile silently prunes cross-platform
+  optional entries (e.g. `@emnapi/core`, `@emnapi/runtime` — wasm32 fallback
+  deps of `sharp`/`@tailwindcss/oxide`, not installed on win32 or linux-x64,
+  but required _in the lockfile_ for `npm ci`'s cross-platform consistency
+  check). `npm ci` then fails on GitHub's Linux runners with `EUSAGE: Missing
+<pkg> from lock file`, even though it passed locally.
+- To add/remove/upgrade a dependency: `rm -rf node_modules package-lock.json`
+  then `npm install` — a full fresh resolution, not an incremental one on top
+  of an existing lock.
+- To just reinstall `node_modules` from an already-correct lockfile (e.g.
+  after switching branches, or to regenerate missing/corrupted bin shims):
+  use `npm ci`, never `npm install` — `npm ci` never rewrites the lockfile.
+- **Before considering any dependency change done, verify `npm ci` inside a
+  real Linux environment, not just on Windows** — Windows `npm ci` does not
+  reliably catch this class of lockfile drift. With Docker/Podman available:
+  ```bash
+  docker run --rm -v "$(pwd -W 2>/dev/null || pwd):/repo" -w /repo node:24 sh -c "npm ci"
+  ```
+  On Windows/Git Bash, prefix with `MSYS_NO_PATHCONV=1` — otherwise Git Bash
+  silently mangles the `-w /repo` path into a Windows path, and the container
+  runs in the wrong directory, giving a misleading unrelated error.
 
 ## 5. Coding conventions
 
