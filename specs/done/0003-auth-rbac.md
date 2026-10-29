@@ -1,6 +1,6 @@
 # 0003 — Auth & RBAC
 
-**Status:** Active
+**Status:** Done (merged in #3)
 **Depends on:** 0001, 0002
 
 ## Context / why
