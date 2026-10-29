@@ -1,6 +1,6 @@
 # 0001 — Project scaffold & quality gates
 
-**Status:** Backlog
+**Status:** Active
 **Depends on:** —
 
 ## Context / why
