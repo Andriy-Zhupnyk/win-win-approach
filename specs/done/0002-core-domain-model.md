@@ -1,6 +1,6 @@
 # 0002 — Core domain model (Prisma schema)
 
-**Status:** Active
+**Status:** Done (merged in #2)
 **Depends on:** 0001
 
 ## Context / why
