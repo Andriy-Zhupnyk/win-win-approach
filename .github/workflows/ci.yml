@@ -28,6 +28,9 @@ jobs:
           --health-retries 5
     env:
       DATABASE_URL: "postgresql://winwin:winwin@localhost:5432/winwin?schema=public"
+      # CI-only signing secret for Auth.js (spec 0003) — not a real secret,
+      # never used outside this ephemeral CI run.
+      AUTH_SECRET: "ci-only-auth-secret-not-for-production-use"
     steps:
       - uses: actions/checkout@v4
 
@@ -57,6 +60,23 @@ jobs:
   e2e:
     name: Playwright e2e
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: winwin
+          POSTGRES_PASSWORD: winwin
+          POSTGRES_DB: winwin
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: "postgresql://winwin:winwin@localhost:5432/winwin?schema=public"
+      AUTH_SECRET: "ci-only-auth-secret-not-for-production-use"
     steps:
       - uses: actions/checkout@v4
 
@@ -70,6 +90,9 @@ jobs:
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
+
+      - name: Apply database migrations
+        run: npx prisma migrate deploy
 
       - name: Run Playwright tests
         run: npm run test:e2e

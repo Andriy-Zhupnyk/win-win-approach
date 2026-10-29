@@ -1,6 +1,6 @@
 # 0003 — Auth & RBAC
 
-**Status:** Backlog
+**Status:** Active
 **Depends on:** 0001, 0002
 
 ## Context / why
@@ -11,8 +11,7 @@ role-based access (`member`, `expert`, `administrator`) gate everything else
 
 ## Scope
 
-- Auth.js (NextAuth v5) with the Prisma adapter, using the `User` model from
-  0002.
+- Auth.js (NextAuth v5) with the Prisma adapter, using the `User` model from 0002.
 - Credentials provider (email + password) is sufficient for the MVP/demo;
   OAuth providers are optional nice-to-have, not required.
 - Registration flow: new users are created with role `MEMBER` by default.
@@ -53,6 +52,14 @@ None beyond what 0002 already defined (reuses `User.role`).
 
 Keys for: register/login/logout form labels and errors, "forbidden" page
 copy. Add to both `uk.json` and `en.json`.
+
+> **Implementation note:** spec 0004 (i18n scaffold, next-intl) has not
+> landed yet and this spec doesn't depend on it, so there is no
+> `messages/{uk,en}.json` to add keys to. UI strings here are plain
+> hardcoded English for now (consistent with "correctness over visual
+> design" in scope). Wiring these strings through next-intl is deferred to
+> whichever of spec 0004 / a follow-up lands next, rather than building
+> i18n scaffolding speculatively inside this spec's scope.
 
 ## Acceptance criteria
 
