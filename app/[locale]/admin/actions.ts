@@ -13,6 +13,8 @@ import {
   TITLE_MAX_LENGTH,
   VERSION_LABEL_MAX_LENGTH,
 } from "@/lib/information-limits";
+import { REVIEW_NOTE_MAX_LENGTH } from "@/lib/proposal-limits";
+import { ProposalNotPendingError, reviewProposal } from "@/lib/proposals";
 import { requireRole, UnauthorizedError } from "@/lib/rbac";
 import { routing, type AppLocale } from "@/i18n/routing";
 import en from "@/messages/en.json";
@@ -33,6 +35,8 @@ export type CreateVersionState = {
 };
 
 export type PublishVersionState = { error?: string; success?: boolean };
+
+export type ReviewProposalState = { error?: string; success?: boolean };
 
 const MESSAGES: Record<AppLocale, typeof en> = { en, uk };
 
@@ -165,6 +169,50 @@ export async function publishVersionAction(
     }
     if (error instanceof PublishConflictError) {
       return { error: t("publishConflict") };
+    }
+    throw error;
+  }
+
+  revalidateInformation();
+  return { success: true };
+}
+
+/**
+ * Accepts or rejects a PENDING proposal with an optional note (spec 0009).
+ * Accepting creates a private DRAFT version; it never publishes anything.
+ * ADMIN only.
+ */
+export async function reviewProposalAction(
+  _prevState: ReviewProposalState,
+  formData: FormData,
+): Promise<ReviewProposalState> {
+  const t = translatorFor(formData);
+  const id = String(formData.get("id") ?? "");
+  const reviewNote = String(formData.get("reviewNote") ?? "").trim();
+  const intent = formData.get("intent");
+
+  const admin = await requireAdmin(t);
+  if ("error" in admin) {
+    return { error: admin.error };
+  }
+
+  if (intent !== "accept" && intent !== "reject") {
+    return { error: t("proposalNotPending") };
+  }
+  if (reviewNote.length > REVIEW_NOTE_MAX_LENGTH) {
+    return { error: t("noteTooLong", { max: REVIEW_NOTE_MAX_LENGTH }) };
+  }
+
+  try {
+    await reviewProposal({
+      id,
+      reviewerId: admin.id,
+      accept: intent === "accept",
+      reviewNote: reviewNote || null,
+    });
+  } catch (error) {
+    if (error instanceof ProposalNotPendingError) {
+      return { error: t("proposalNotPending") };
     }
     throw error;
   }

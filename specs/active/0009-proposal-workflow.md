@@ -1,6 +1,6 @@
 # 0009 — Proposal workflow
 
-**Status:** Backlog
+**Status:** Active
 **Depends on:** 0003, 0005, 0007
 
 ## Context / why
@@ -25,7 +25,7 @@ content), distinct from an admin directly authoring content (0007).
 
 ## Non-goals
 
-- No threaded discussion *on* a proposal (that's what the Discussion module
+- No threaded discussion _on_ a proposal (that's what the Discussion module
   is for, if needed — don't duplicate it here).
 - No multi-step/multi-approver workflow — single admin accept/reject is
   enough for MVP.

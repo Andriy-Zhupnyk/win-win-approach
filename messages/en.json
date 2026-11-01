@@ -9,7 +9,8 @@
     "discussion": "Discussion",
     "account": "Account",
     "admin": "Admin",
-    "logout": "Log out"
+    "logout": "Log out",
+    "proposals": "Proposals"
   },
   "localeSwitcher": {
     "label": "Language"
@@ -116,7 +117,19 @@
       "titleTooLong": "Titles must be at most {max} characters.",
       "bodyTooLong": "Bodies must be at most {max} characters.",
       "draftNotFound": "This draft no longer exists or is already published.",
-      "publishConflict": "Another version was published at the same time. Reload and try again."
+      "publishConflict": "Another version was published at the same time. Reload and try again.",
+      "proposalNotPending": "This proposal no longer exists or has already been reviewed.",
+      "noteTooLong": "The review note must be at most {max} characters."
+    },
+    "proposals": {
+      "heading": "Pending proposals",
+      "empty": "There are no pending proposals.",
+      "submittedBy": "Submitted by {author} on {date}",
+      "targets": "Proposes changing:",
+      "standalone": "New content suggestion",
+      "note": "Review note (optional, visible to the submitter)",
+      "accept": "Accept",
+      "reject": "Reject"
     }
   },
   "discussion": {
@@ -163,5 +176,36 @@
   "forbidden": {
     "heading": "Forbidden",
     "message": "You do not have permission to view this page."
+  },
+  "proposals": {
+    "heading": "My proposals",
+    "form": {
+      "heading": "Propose a change",
+      "version": "Information version to change (optional)",
+      "noVersion": "None (new content suggestion)",
+      "body": "Your proposed text",
+      "submit": "Submit proposal",
+      "submitting": "Submitting…",
+      "submitted": "Proposal submitted."
+    },
+    "list": {
+      "heading": "Submitted proposals",
+      "empty": "You have not submitted any proposals yet.",
+      "submittedOn": "Submitted {date}",
+      "targets": "Proposes changing:",
+      "reviewNote": "Review note:"
+    },
+    "status": {
+      "PENDING": "Pending",
+      "ACCEPTED": "Accepted",
+      "REJECTED": "Rejected"
+    },
+    "errors": {
+      "unauthorized": "You must be logged in to do this.",
+      "forbidden": "You do not have permission to do this.",
+      "bodyRequired": "Proposal text is required.",
+      "bodyTooLong": "Proposal text must be at most {max} characters.",
+      "versionNotFound": "The selected Information version does not exist."
+    }
   }
 }

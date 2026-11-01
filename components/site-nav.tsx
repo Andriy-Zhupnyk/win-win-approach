@@ -36,6 +36,9 @@ export async function SiteNav() {
             <span className="text-zinc-500 dark:text-zinc-400">
               {user.name ?? user.email}
             </span>
+            {can(session, ["MEMBER", "EXPERT"]) ? (
+              <Link href="/proposals">{t("proposals")}</Link>
+            ) : null}
             <Link href="/account">{t("account")}</Link>
             {can(session, ["ADMIN"]) ? (
               <Link href="/admin">{t("admin")}</Link>

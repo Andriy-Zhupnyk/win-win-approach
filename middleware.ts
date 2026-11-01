@@ -29,8 +29,9 @@ export default auth((req) => {
 
   const isAccountRoute = pathWithoutLocale.startsWith("/account");
   const isAdminRoute = pathWithoutLocale.startsWith("/admin");
+  const isProposalsRoute = pathWithoutLocale.startsWith("/proposals");
 
-  if (isAccountRoute || isAdminRoute) {
+  if (isAccountRoute || isAdminRoute || isProposalsRoute) {
     const isLoggedIn = !!req.auth;
 
     if (!isLoggedIn) {
