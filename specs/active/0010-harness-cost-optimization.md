@@ -1,6 +1,6 @@
 # 0010 — Harness cost optimization
 
-**Status:** Backlog
+**Status:** Active
 **Depends on:** 0001
 
 ## Context / why

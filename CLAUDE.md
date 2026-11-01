@@ -97,32 +97,29 @@ description.
 
 ### 4.1 Lockfile hygiene (read this before touching dependencies)
 
-This has broken CI twice already, on this exact project, from the exact same
-cause — treat this as load-bearing, not advisory:
+A plain `npm install` on Windows prunes cross-platform optional entries from
+`package-lock.json`, which later breaks `npm ci` on GitHub's Linux runners
+(this broke CI twice). Never edit dependencies or the lockfile by hand-running
+npm on the host. Use the scripts, which regenerate the lockfile inside a
+`node:24` container and then restore the host's `node_modules` with `npm ci`
+(docker or podman, works from Git Bash):
 
-- **Never run plain `npm install` to "fix" or refresh `package-lock.json` on a
-  Windows dev machine.** Even with an empty `node_modules/`, a plain
-  `npm install` against an _existing_ lockfile silently prunes cross-platform
-  optional entries (e.g. `@emnapi/core`, `@emnapi/runtime` — wasm32 fallback
-  deps of `sharp`/`@tailwindcss/oxide`, not installed on win32 or linux-x64,
-  but required _in the lockfile_ for `npm ci`'s cross-platform consistency
-  check). `npm ci` then fails on GitHub's Linux runners with `EUSAGE: Missing
-<pkg> from lock file`, even though it passed locally.
-- To add/remove/upgrade a dependency: `rm -rf node_modules package-lock.json`
-  then `npm install` — a full fresh resolution, not an incremental one on top
-  of an existing lock.
-- To just reinstall `node_modules` from an already-correct lockfile (e.g.
-  after switching branches, or to regenerate missing/corrupted bin shims):
-  use `npm ci`, never `npm install` — `npm ci` never rewrites the lockfile.
-- **Before considering any dependency change done, verify `npm ci` inside a
-  real Linux environment, not just on Windows** — Windows `npm ci` does not
-  reliably catch this class of lockfile drift. With Docker/Podman available:
-  ```bash
-  docker run --rm -v "$(pwd -W 2>/dev/null || pwd):/repo" -w /repo node:24 sh -c "npm ci"
-  ```
-  On Windows/Git Bash, prefix with `MSYS_NO_PATHCONV=1` — otherwise Git Bash
-  silently mangles the `-w /repo` path into a Windows path, and the container
-  runs in the wrong directory, giving a misleading unrelated error.
+```bash
+npm run deps:add -- <pkg...>      # flags such as -D pass through
+npm run deps:remove -- <pkg...>
+npm run deps:verify               # Linux `npm ci` against the current lockfile
+```
+
+Run `deps:verify` before considering any dependency change done. Never run
+plain `npm install` to "refresh" the lockfile; to reinstall `node_modules` from
+a correct lockfile use `npm ci`.
+
+### 4.2 One command for the gates
+
+`npm run verify` runs lint, typecheck, test and build in order, stops at the
+first failure and prints a one-line result per step (plus the tail of the
+failing step). A `SubagentStop` hook in `.claude/settings.json` runs it once
+when the `spec-implementer` subagent finishes, only if non-doc files changed.
 
 ## 5. Coding conventions
 
@@ -181,6 +178,33 @@ cause — treat this as load-bearing, not advisory:
 /messages             uk.json, en.json (next-intl)
 /tests                Vitest unit/integration tests (mirrors /app, /lib)
 /e2e                  Playwright tests
+/scripts              Harness scripts (verify, deps, gh-flow, hooks)
+/.claude              Agent definitions and project hooks
 /specs                Spec backlog/active/done (see specs/README.md)
 .github/workflows     CI pipelines
 ```
+
+## 9. Working cost-efficiently
+
+Most of the cost of a spec is re-reading a large context on every request, not
+useful work. Keep the context small and move deterministic work into scripts.
+
+- **One spec per session.** After each merge run `/clear` or start a new
+  session; all state lives in the repo (specs, git), not in the conversation.
+- **Right model for the role.** Opus for writing specs and judgment calls,
+  Sonnet for implementation (the `spec-implementer` subagent in
+  `.claude/agents/`), scripts for mechanical steps.
+- **Short subagent prompts:** "Implement `specs/backlog/NNNN-...md`". The
+  standing instructions live in the agent definition.
+- **Don't re-verify.** The `verify` hook proves the gates when the
+  implementer stops and CI proves them again on the PR; the orchestrator does
+  not re-run lint/typecheck/test/build or the Linux `npm ci` unless a
+  dependency changed.
+- **GitHub steps are scripts, not conversations.** Use `scripts/gh-flow.mjs`
+  (`pr-create`, `ci-wait`, `merge-close`) instead of hand-rolled curl calls,
+  and never poll CI with scheduled wake-ups. Call `merge-close` only after the
+  human approves the merge.
+- **Manual recommendation (not automated):** disable MCP servers you don't use
+  in your environment; their tool definitions are re-sent on every request
+  (about 58k tokens in the measured session).
+- Record spend per spec in the PR template's "Cost" section.
