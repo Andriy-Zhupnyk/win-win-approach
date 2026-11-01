@@ -1,6 +1,6 @@
 # 0007 — Admin content management panel
 
-**Status:** Backlog
+**Status:** Active
 **Depends on:** 0003, 0005
 
 ## Context / why
@@ -14,8 +14,7 @@ into the version history from 0005).
 - `/admin` route (ADMIN role only, enforced via RBAC from 0003).
 - A form to create a new `InformationVersion`: version label (e.g.
   "GS 0.3"), title, body (plain markdown textarea is fine for MVP — no need
-  for a rich WYSIWYG editor), per-locale fields per the approach chosen in
-  0005.
+  for a rich WYSIWYG editor), per-locale fields per the approach chosen in 0005.
 - Publishing a new version: marks the previous `PUBLISHED` version as
   `ARCHIVED` and the new one as `PUBLISHED` (atomic — never two
   simultaneously `PUBLISHED`).
@@ -27,8 +26,7 @@ into the version history from 0005).
 
 - No rich-text editor, no image upload, no scheduled/future-dated
   publishing — all nice-to-haves for a later spec.
-- This spec does not cover reviewing member/expert *proposals* — that's
-  0009. This is direct admin authoring.
+- This spec does not cover reviewing member/expert _proposals_ — that's 0009. This is direct admin authoring.
 
 ## Data model changes
 
@@ -45,7 +43,7 @@ None beyond 0002 (reuses `InformationVersion.status`).
 
 Keys for admin form labels, status labels, confirmation/success messages —
 both locales. (The admin UI itself doesn't need to be bilingual content-wise
-— the *content being authored* is per-locale per 0005's chosen approach —
+— the _content being authored_ is per-locale per 0005's chosen approach —
 but UI chrome strings still go through next-intl.)
 
 ## Acceptance criteria

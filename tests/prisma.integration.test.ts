@@ -82,7 +82,9 @@ describe("Prisma core domain model (integration)", () => {
         versionLabel: `TEST ${runId}`,
         title: "Integration test version",
         body: "Round-trip test body.",
-        status: InformationStatus.PUBLISHED,
+        // ARCHIVED, not PUBLISHED: the database allows at most one PUBLISHED
+        // version (spec 0007), and the shared dev database may already have one.
+        status: InformationStatus.ARCHIVED,
         publishedAt: new Date(),
         authorId: adminId,
       },
@@ -93,7 +95,7 @@ describe("Prisma core domain model (integration)", () => {
       include: { author: true },
     });
 
-    expect(found.status).toBe(InformationStatus.PUBLISHED);
+    expect(found.status).toBe(InformationStatus.ARCHIVED);
     expect(found.author.id).toBe(adminId);
   });
 

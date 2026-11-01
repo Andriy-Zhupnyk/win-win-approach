@@ -80,7 +80,42 @@
   },
   "admin": {
     "heading": "Admin",
-    "comingLater": "Content management arrives in a later spec."
+    "form": {
+      "heading": "New version",
+      "versionLabel": "Version label",
+      "versionLabelPlaceholder": "e.g. GS 0.3",
+      "title": "Title (English)",
+      "body": "Body (English, markdown)",
+      "ukHint": "The Ukrainian text is optional; the English text is shown when it is empty.",
+      "titleUk": "Title (Ukrainian)",
+      "bodyUk": "Body (Ukrainian, markdown)",
+      "saveDraft": "Save as draft",
+      "publish": "Publish",
+      "savedDraft": "Draft saved.",
+      "published": "Version published."
+    },
+    "list": {
+      "heading": "All versions",
+      "empty": "There are no versions yet.",
+      "updatedOn": "Updated {date}",
+      "publish": "Publish"
+    },
+    "status": {
+      "DRAFT": "Draft",
+      "PUBLISHED": "Published",
+      "ARCHIVED": "Archived"
+    },
+    "errors": {
+      "unauthorized": "You must be logged in to do this.",
+      "forbidden": "You do not have permission to do this.",
+      "versionLabelRequired": "Version label is required.",
+      "versionLabelTooLong": "Version label must be at most {max} characters.",
+      "contentRequired": "Title and body are required.",
+      "titleTooLong": "Titles must be at most {max} characters.",
+      "bodyTooLong": "Bodies must be at most {max} characters.",
+      "draftNotFound": "This draft no longer exists or is already published.",
+      "publishConflict": "Another version was published at the same time. Reload and try again."
+    }
   },
   "forbidden": {
     "heading": "Forbidden",

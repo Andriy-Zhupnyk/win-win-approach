@@ -81,6 +81,16 @@ async function main() {
     publishedAt: new Date("2026-09-15T12:00:00Z"),
     authorId: admin.id,
   };
+  // The database allows at most one PUBLISHED version (spec 0007), so retire
+  // any other published version (e.g. one an admin published since the last
+  // seed) before restoring the fixture.
+  await prisma.informationVersion.updateMany({
+    where: {
+      status: InformationStatus.PUBLISHED,
+      id: { not: "seed-information-version-gs-0-2" },
+    },
+    data: { status: InformationStatus.ARCHIVED },
+  });
   const publishedVersion = await prisma.informationVersion.upsert({
     where: { id: "seed-information-version-gs-0-2" },
     update: publishedData,

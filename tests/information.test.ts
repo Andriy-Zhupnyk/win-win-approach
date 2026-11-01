@@ -2,12 +2,13 @@
 //
 // Spec 0005 data-fetching logic, run against the real Postgres database
 // (same approach as tests/prisma.integration.test.ts). Fixtures are tagged
-// with a random run id and removed afterwards. The "current" fixture uses a
-// far-future publishedAt so it is the latest PUBLISHED row regardless of any
-// seeded data in the dev database.
+// with a random run id and removed afterwards. Only one version can be
+// PUBLISHED at a time, so the suite temporarily takes over that slot (see
+// tests/helpers/published-slot.ts) and restores any seeded one at the end.
 import { randomUUID } from "node:crypto";
 import { InformationStatus, PrismaClient, Role } from "@prisma/client";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { takePublishedSlot } from "./helpers/published-slot";
 import {
   getCurrentVersion,
   getVersionById,
@@ -19,6 +20,7 @@ const prisma = new PrismaClient();
 const runId = randomUUID().slice(0, 8);
 
 let authorId: string;
+let restorePublished: () => Promise<void>;
 const ids = { current: "", archived: "", draft: "", noUk: "" };
 
 async function makeVersion(
@@ -47,6 +49,7 @@ async function makeVersion(
 }
 
 beforeAll(async () => {
+  restorePublished = await takePublishedSlot(prisma);
   const author = await prisma.user.create({
     data: {
       email: `info-${runId}@test.winwinapproach.invalid`,
@@ -82,6 +85,7 @@ beforeAll(async () => {
 afterAll(async () => {
   await prisma.informationVersion.deleteMany({ where: { authorId } });
   await prisma.user.delete({ where: { id: authorId } });
+  await restorePublished();
   await prisma.$disconnect();
 });
 
