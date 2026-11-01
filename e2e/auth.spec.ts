@@ -60,6 +60,11 @@ for (const { code, messages } of LOCALES) {
     ).toBeVisible();
 
     await page.goto(`/${code}`);
+    // Let the nav-link RSC prefetches finish first. Each one renders with
+    // the old session and re-issues the session cookie, so one still in
+    // flight when logout clears the cookie can resurrect it (observed against
+    // a production build, where Next prefetches links).
+    await page.waitForLoadState("networkidle");
     await page.getByRole("button", { name: messages.nav.logout }).click();
     await expect(page).toHaveURL(`/${code}`);
     await expect(

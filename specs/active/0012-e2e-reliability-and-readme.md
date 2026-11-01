@@ -1,6 +1,6 @@
 # 0012 — E2E reliability and README refresh
 
-**Status:** Backlog
+**Status:** Active
 **Depends on:** 0009, 0010
 
 ## Context / why

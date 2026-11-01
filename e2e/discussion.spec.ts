@@ -77,9 +77,11 @@ for (const { code, messages } of LOCALES) {
     );
     await expect(page.getByTestId("post").nth(1)).toContainText(displayName);
 
-    // The list shows the thread first (most recent) with one reply.
+    // The list shows the thread with one reply. Select it by its unique
+    // title: the en and uk tests run in parallel against the same database,
+    // so "the first item" may be the other locale's thread.
     await page.goto(`/${code}/discussion`);
-    const item = page.getByRole("listitem").first();
+    const item = page.getByRole("listitem").filter({ hasText: title });
     await expect(item).toContainText(title);
     await expect(item).toContainText(displayName);
     await expect(item.getByTestId("reply-count")).toHaveText(

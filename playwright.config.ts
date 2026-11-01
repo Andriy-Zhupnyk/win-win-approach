@@ -36,9 +36,22 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: `npm run dev -- -p ${PORT}`,
+    // Serve a production build, not `next dev`: the dev server compiles each
+    // route on its first request, and with parallel workers that on-demand
+    // compilation blows Playwright's 5s expect timeout and intermittently
+    // fails requests (spec 0012). A production build has nothing left to
+    // compile, so the suite behaves the same cold or warm. The build time
+    // counts against the webServer timeout below.
+    command: `npm run build && npm run start -- -p ${PORT}`,
     url: baseURL,
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
+    // Never reuse a running server: a leftover `next dev` or an older build
+    // on this port would silently test stale or differently-behaving code.
+    reuseExistingServer: false,
+    timeout: 300_000,
+    env: {
+      // Auth.js rejects non-Vercel hosts in production unless told to trust
+      // them; the e2e server is reached as 127.0.0.1.
+      AUTH_TRUST_HOST: "true",
+    },
   },
 });
