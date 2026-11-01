@@ -40,6 +40,7 @@ agent's job), but it should be precise about acceptance criteria, because
 those are what the agent (and CI) use to know when the work is done.
 
 A good spec:
+
 - Is implementable without the agent needing to ask a clarifying question
   about scope (if it can't be, it's not ready to move out of `backlog/`).
 - Lists concrete, testable acceptance criteria.
@@ -48,18 +49,22 @@ A good spec:
 
 ## Current backlog (initial foundation + MVP features, in dependency order)
 
-| # | Spec | Depends on |
-|---|---|---|
-| 0001 | Project scaffold & quality gates | — |
-| 0002 | Core domain model (Prisma schema) | 0001 |
-| 0003 | Auth & RBAC | 0001, 0002 |
-| 0004 | i18n scaffold (uk/en) | 0001 |
-| 0005 | Public Information page + version history | 0002, 0004 |
-| 0006 | Personal account area | 0003, 0004 |
-| 0007 | Admin content management panel | 0003, 0005 |
-| 0008 | Discussion module | 0002, 0003, 0004 |
-| 0009 | Proposal workflow | 0003, 0005, 0007 |
+| #    | Spec                                      | Depends on       |
+| ---- | ----------------------------------------- | ---------------- |
+| 0001 | Project scaffold & quality gates          | —                |
+| 0002 | Core domain model (Prisma schema)         | 0001             |
+| 0003 | Auth & RBAC                               | 0001, 0002       |
+| 0004 | i18n scaffold (uk/en)                     | 0001             |
+| 0005 | Public Information page + version history | 0002, 0004       |
+| 0006 | Personal account area                     | 0003, 0004       |
+| 0007 | Admin content management panel            | 0003, 0005       |
+| 0008 | Discussion module                         | 0002, 0003, 0004 |
+| 0009 | Proposal workflow                         | 0003, 0005, 0007 |
+| 0010 | Harness cost optimization                 | 0001             |
 
 0001–0004 are foundation work and should be done in roughly that order before
 any MVP feature spec starts, since every later spec depends on at least one
 of them.
+
+0010 is harness-only (no app code). It should be done before 0005, because
+it lowers the cost of every remaining spec.
