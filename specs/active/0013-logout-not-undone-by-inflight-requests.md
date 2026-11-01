@@ -1,6 +1,6 @@
 # 0013 — Logout must not be undone by in-flight requests
 
-**Status:** Backlog
+**Status:** Active
 **Depends on:** 0003, 0012
 
 ## Context / why
