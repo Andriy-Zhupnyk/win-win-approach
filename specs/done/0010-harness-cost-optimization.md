@@ -1,6 +1,6 @@
 # 0010 — Harness cost optimization
 
-**Status:** Active
+**Status:** Done (merged in #5)
 **Depends on:** 0001
 
 ## Context / why
