@@ -1,6 +1,6 @@
 # 0007 — Admin content management panel
 
-**Status:** Active
+**Status:** Done (merged in #8)
 **Depends on:** 0003, 0005
 
 ## Context / why
