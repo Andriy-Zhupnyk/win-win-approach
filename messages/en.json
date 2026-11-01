@@ -6,6 +6,7 @@
   "nav": {
     "login": "Log in",
     "register": "Register",
+    "discussion": "Discussion",
     "account": "Account",
     "admin": "Admin",
     "logout": "Log out"
@@ -22,7 +23,8 @@
     "statusCurrent": "Current",
     "statusArchived": "Archived",
     "archivedNotice": "This is an archived version ({label}) and may be out of date.",
-    "viewCurrent": "View the current version"
+    "viewCurrent": "View the current version",
+    "discussVersion": "Discuss this version"
   },
   "auth": {
     "login": {
@@ -115,6 +117,47 @@
       "bodyTooLong": "Bodies must be at most {max} characters.",
       "draftNotFound": "This draft no longer exists or is already published.",
       "publishConflict": "Another version was published at the same time. Reload and try again."
+    }
+  },
+  "discussion": {
+    "heading": "Discussion",
+    "newThread": "New thread",
+    "empty": "There are no threads yet.",
+    "startedBy": "Started by {author} on {date}",
+    "replies": "{count, plural, one {# reply} other {# replies}}",
+    "lastActivity": "last activity {date}",
+    "backToList": "Back to all threads",
+    "discussingVersion": "Discussing Information version:",
+    "loginPrompt": {
+      "message": "Want to take part in the discussion?",
+      "login": "Log in",
+      "or": "or",
+      "register": "register"
+    },
+    "form": {
+      "heading": "Start a new thread",
+      "title": "Title",
+      "body": "Your post",
+      "version": "Information version being discussed (optional)",
+      "noVersion": "None",
+      "create": "Create thread",
+      "creating": "Creating…"
+    },
+    "reply": {
+      "heading": "Reply",
+      "body": "Your reply",
+      "submit": "Post reply",
+      "submitting": "Posting…"
+    },
+    "errors": {
+      "unauthorized": "You must be logged in to do this.",
+      "forbidden": "You do not have permission to do this.",
+      "titleRequired": "Title is required.",
+      "titleTooLong": "Title must be at most {max} characters.",
+      "bodyRequired": "Post text is required.",
+      "bodyTooLong": "Post text must be at most {max} characters.",
+      "versionNotFound": "The selected Information version does not exist.",
+      "threadNotFound": "This thread no longer exists."
     }
   },
   "forbidden": {
