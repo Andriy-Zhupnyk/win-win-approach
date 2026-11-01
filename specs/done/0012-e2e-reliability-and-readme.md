@@ -1,6 +1,6 @@
 # 0012 — E2E reliability and README refresh
 
-**Status:** Active
+**Status:** Done (merged in #12)
 **Depends on:** 0009, 0010
 
 ## Context / why
