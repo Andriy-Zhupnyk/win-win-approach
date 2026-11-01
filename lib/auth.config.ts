@@ -15,10 +15,16 @@ export const authConfig = {
   callbacks: {
     // Runs on every request that touches the session; only has `user` on
     // the initial sign-in, so carry id/role forward into the token itself.
-    jwt({ token, user }) {
+    jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
         token.role = user.role as Role;
+      }
+      // Spec 0006: after a profile edit the action calls `unstable_update`
+      // so the display name shown in the nav doesn't stay stale. Only the
+      // name is accepted here; id/role must never be client-influenced.
+      if (trigger === "update" && typeof session?.user?.name === "string") {
+        token.name = session.user.name;
       }
       return token;
     },

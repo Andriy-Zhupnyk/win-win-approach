@@ -56,7 +56,21 @@
   },
   "account": {
     "heading": "Account",
-    "signedInAs": "Signed in with role {role}. Profile editing arrives in a later spec.",
+    "emailLabel": "Email",
+    "roleLabel": "Role",
+    "memberSinceLabel": "Member since",
+    "displayNameLabel": "Display name",
+    "edit": {
+      "save": "Save",
+      "saving": "Saving…",
+      "saved": "Profile saved.",
+      "errors": {
+        "displayNameRequired": "Display name is required.",
+        "displayNameTooLong": "Display name must be at most {max} characters.",
+        "unauthorized": "You must be logged in to edit your profile.",
+        "forbidden": "You do not have permission to edit this profile."
+      }
+    },
     "roles": {
       "VISITOR": "Visitor",
       "MEMBER": "Member",
