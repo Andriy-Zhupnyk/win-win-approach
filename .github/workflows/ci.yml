@@ -94,5 +94,8 @@ jobs:
       - name: Apply database migrations
         run: npx prisma migrate deploy
 
+      - name: Seed fixture data
+        run: npm run db:seed
+
       - name: Run Playwright tests
         run: npm run test:e2e

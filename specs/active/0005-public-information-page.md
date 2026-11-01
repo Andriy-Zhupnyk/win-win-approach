@@ -1,6 +1,6 @@
 # 0005 — Public Information page + version history
 
-**Status:** Backlog
+**Status:** Active
 **Depends on:** 0002, 0004
 
 ## Context / why

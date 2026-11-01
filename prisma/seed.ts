@@ -3,7 +3,7 @@
 // Run via `npm run db:seed`. Creates enough data to exercise later specs
 // (auth/RBAC, the Information page, discussion, proposals) without having
 // to hand-create data every time: one admin, one member, one expert, and
-// one published InformationVersion ("GS 0.1").
+// an archived ("GS 0.1") and a published ("GS 0.2") InformationVersion.
 //
 // Idempotent: re-running it upserts by email/versionLabel instead of
 // duplicating rows.
@@ -50,22 +50,41 @@ async function main() {
   });
 
   // versionLabel isn't a unique column (by design — admins may reuse a
-  // label while drafting), so this fixture uses a fixed, well-known id to
-  // make the seed idempotent across re-runs.
+  // label while drafting), so these fixtures use fixed, well-known ids to
+  // make the seed idempotent across re-runs. `update` mirrors `create` so
+  // re-seeding also repairs a fixture that drifted (e.g. status changed).
+  const archivedData = {
+    versionLabel: "GS 0.1",
+    title: "Win-Win Approach — General Statement (first draft)",
+    body: "This is the first published version of the General Statement.\n\nIt has since been superseded and is kept for reference.",
+    titleUk: "Win-Win Approach — Загальна заява (перша редакція)",
+    bodyUk:
+      "Це перша опублікована версія Загальної заяви.\n\nЇї замінено новішою, а ця зберігається для довідки.",
+    status: InformationStatus.ARCHIVED,
+    publishedAt: new Date("2026-08-15T12:00:00Z"),
+    authorId: admin.id,
+  };
+  await prisma.informationVersion.upsert({
+    where: { id: "seed-information-version-gs-0-1" },
+    update: archivedData,
+    create: { id: "seed-information-version-gs-0-1", ...archivedData },
+  });
+
+  const publishedData = {
+    versionLabel: "GS 0.2",
+    title: "Win-Win Approach — General Statement",
+    body: "This is the current, published version of the General Statement.\n\nIt refines the first draft and is the starting point for discussion.",
+    titleUk: "Win-Win Approach — Загальна заява",
+    bodyUk:
+      "Це поточна опублікована версія Загальної заяви.\n\nВона уточнює першу редакцію і є відправною точкою для обговорення.",
+    status: InformationStatus.PUBLISHED,
+    publishedAt: new Date("2026-09-15T12:00:00Z"),
+    authorId: admin.id,
+  };
   const publishedVersion = await prisma.informationVersion.upsert({
-    where: {
-      id: "seed-information-version-gs-0-1",
-    },
-    update: {},
-    create: {
-      id: "seed-information-version-gs-0-1",
-      versionLabel: "GS 0.1",
-      title: "Win-Win Approach — General Statement",
-      body: "This is the seeded, published starting point of the Information page content.",
-      status: InformationStatus.PUBLISHED,
-      publishedAt: new Date(),
-      authorId: admin.id,
-    },
+    where: { id: "seed-information-version-gs-0-2" },
+    update: publishedData,
+    create: { id: "seed-information-version-gs-0-2", ...publishedData },
   });
 
   console.log("Seeded:", {
