@@ -136,6 +136,12 @@ model InformationVersion {
 
   // Used to find "the current page" (latest PUBLISHED version) and to list
   // version history by status.
+  //
+  // NOTE: the database also has a partial unique index,
+  // "InformationVersion_single_published_key" (migration
+  // 20261101130000_single_published_information_version), guaranteeing at
+  // most one PUBLISHED row (spec 0007). Prisma cannot model partial indexes,
+  // so it is intentionally absent here; do not drop it.
   @@index([status])
 }
 

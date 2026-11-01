@@ -12,6 +12,9 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     globals: true,
+    // Integration tests share one database, and "at most one PUBLISHED
+    // InformationVersion" is global state (see tests/helpers/published-slot.ts).
+    fileParallelism: false,
     setupFiles: ["tests/setup.ts"],
     include: ["tests/**/*.test.{ts,tsx}"],
     exclude: ["e2e/**", "node_modules/**"],
