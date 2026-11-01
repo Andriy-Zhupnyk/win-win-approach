@@ -1,6 +1,6 @@
 # 0006 — Personal account area
 
-**Status:** Active
+**Status:** Done (merged in #7)
 **Depends on:** 0003, 0004
 
 ## Context / why
