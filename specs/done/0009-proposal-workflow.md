@@ -1,6 +1,6 @@
 # 0009 — Proposal workflow
 
-**Status:** Active
+**Status:** Done (merged in #10)
 **Depends on:** 0003, 0005, 0007
 
 ## Context / why
