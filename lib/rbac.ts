@@ -1,6 +1,5 @@
 import type { Role } from "@prisma/client";
 import type { Session } from "next-auth";
-import { redirect } from "next/navigation";
 
 // Centralized RBAC helper (spec 0003). This is the ONLY place role checks
 // are implemented — every server action / route handler / page that needs
@@ -96,11 +95,21 @@ export async function requirePageRole(allowedRoles: readonly Role[]) {
   try {
     return requireRole(session, allowedRoles);
   } catch (error) {
-    if (error instanceof UnauthorizedError) {
-      redirect("/login");
-    }
-    if (error instanceof ForbiddenError) {
-      redirect("/forbidden");
+    if (error instanceof UnauthorizedError || error instanceof ForbiddenError) {
+      // Deferred imports, same rationale as lib/auth.ts above: both of
+      // these only resolve cleanly inside Next.js's own module graph (the
+      // `react-server` build of next-intl, and next/navigation underneath
+      // `@/i18n/navigation`), not under Vitest.
+      const { getLocale } = await import("next-intl/server");
+      const { redirect } = await import("@/i18n/navigation");
+      const locale = await getLocale();
+      // The i18n-aware `redirect` (unlike next/navigation's) requires the
+      // locale explicitly rather than inferring it, so it can be called
+      // from contexts where that isn't otherwise obvious.
+      redirect({
+        href: error instanceof UnauthorizedError ? "/login" : "/forbidden",
+        locale,
+      });
     }
     throw error;
   }

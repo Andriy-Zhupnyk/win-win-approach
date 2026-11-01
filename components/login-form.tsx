@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState } from "react";
-import { loginAction, type LoginState } from "@/app/login/actions";
+import { useLocale, useTranslations } from "next-intl";
+import { loginAction, type LoginState } from "@/app/[locale]/login/actions";
 
 const initialState: LoginState = {};
 
@@ -10,12 +11,21 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
     loginAction,
     initialState,
   );
+  const t = useTranslations("auth.login");
+  const locale = useLocale();
 
   return (
     <form action={formAction} className="flex w-full max-w-sm flex-col gap-3">
-      <input type="hidden" name="callbackUrl" value={callbackUrl ?? "/"} />
+      <input
+        type="hidden"
+        name="callbackUrl"
+        value={callbackUrl ?? `/${locale}`}
+      />
+      {/* Server Actions don't get the request locale for free — see the
+          comment in app/[locale]/login/actions.ts. */}
+      <input type="hidden" name="locale" value={locale} />
       <label className="flex flex-col gap-1 text-sm">
-        Email
+        {t("emailLabel")}
         <input
           name="email"
           type="email"
@@ -25,7 +35,7 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
         />
       </label>
       <label className="flex flex-col gap-1 text-sm">
-        Password
+        {t("passwordLabel")}
         <input
           name="password"
           type="password"
@@ -44,7 +54,7 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
         disabled={pending}
         className="rounded bg-zinc-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-900"
       >
-        {pending ? "Logging in…" : "Log in"}
+        {pending ? t("submitting") : t("submit")}
       </button>
     </form>
   );
