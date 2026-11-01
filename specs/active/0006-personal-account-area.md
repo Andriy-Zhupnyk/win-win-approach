@@ -1,6 +1,6 @@
 # 0006 — Personal account area
 
-**Status:** Backlog
+**Status:** Active
 **Depends on:** 0003, 0004
 
 ## Context / why

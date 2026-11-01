@@ -15,7 +15,7 @@ import { authConfig } from "@/lib/auth.config";
 // support database sessions (Auth.js persists an Account/Session row only
 // for provider-brokered sign-ins, never for Credentials), so this must be
 // set even though an adapter is configured.
-export const { handlers, auth, signIn, signOut } = NextAuth({
+export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
   ...authConfig,
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
