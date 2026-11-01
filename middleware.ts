@@ -2,6 +2,10 @@ import NextAuth from "next-auth";
 import createIntlMiddleware from "next-intl/middleware";
 import { NextResponse } from "next/server";
 import { authConfig } from "@/lib/auth.config";
+import {
+  mayRefreshSessionCookie,
+  stripSessionSetCookies,
+} from "@/lib/session-cookie";
 import { routing } from "@/i18n/routing";
 
 // Edge-level route protection for spec 0003, now composed with spec 0004's
@@ -19,7 +23,7 @@ const intlMiddleware = createIntlMiddleware(routing);
 
 const localePattern = new RegExp(`^/(${routing.locales.join("|")})(?=/|$)`);
 
-export default auth((req) => {
+const authMiddleware = auth((req) => {
   const { pathname } = req.nextUrl;
   const localeMatch = pathname.match(localePattern);
   const locale = localeMatch ? localeMatch[1] : routing.defaultLocale;
@@ -49,6 +53,22 @@ export default auth((req) => {
 
   return intlMiddleware(req);
 });
+
+// Spec 0013: `auth()` copies the refreshed session cookie onto every
+// response, including background requests such as link prefetches. One still
+// in flight when the user logs out would write the old session back. Only
+// browser page navigations may refresh the cookie. The session itself is
+// still read and enforced above; only the cookie refresh is dropped.
+export default async function middleware(
+  ...args: Parameters<typeof authMiddleware>
+): Promise<Response | undefined> {
+  const [req] = args;
+  const response = (await authMiddleware(...args)) as Response | undefined;
+  if (response && !mayRefreshSessionCookie(req.headers)) {
+    stripSessionSetCookies(response.headers);
+  }
+  return response;
+}
 
 export const config = {
   // Run on every page path (so next-intl can resolve/redirect the locale
