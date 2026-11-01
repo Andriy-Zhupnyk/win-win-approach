@@ -1,6 +1,6 @@
 # 0004 — i18n scaffold (uk/en)
 
-**Status:** Active
+**Status:** Done (merged in #4)
 **Depends on:** 0001
 
 ## Context / why
