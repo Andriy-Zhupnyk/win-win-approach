@@ -52,13 +52,19 @@ export function InformationView({
           </p>
         ))}
       </div>
-      {isCurrent ? (
-        <p className="mt-10 text-sm">
+      <p className="mt-10 flex gap-4 text-sm">
+        {isCurrent ? (
           <Link href="/information/versions" className="underline">
             {t("versionHistory")}
           </Link>
-        </p>
-      ) : null}
+        ) : null}
+        <Link
+          href={{ pathname: "/discussion/new", query: { version: version.id } }}
+          className="underline"
+        >
+          {t("discussVersion")}
+        </Link>
+      </p>
     </article>
   );
 }

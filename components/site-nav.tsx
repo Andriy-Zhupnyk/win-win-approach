@@ -30,6 +30,7 @@ export async function SiteNav() {
         {common("siteName")}
       </Link>
       <div className="flex items-center gap-4">
+        <Link href="/discussion">{t("discussion")}</Link>
         {user ? (
           <>
             <span className="text-zinc-500 dark:text-zinc-400">
