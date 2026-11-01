@@ -13,9 +13,16 @@
   "localeSwitcher": {
     "label": "Мова"
   },
-  "home": {
-    "title": "Win-Win Approach",
-    "subtitle": "Скоро запуск."
+  "information": {
+    "emptyHeading": "Win-Win Approach",
+    "empty": "Інформацію ще не опубліковано.",
+    "versionHistory": "Історія версій",
+    "noVersions": "Жодної версії ще не опубліковано.",
+    "publishedOn": "Опубліковано {date}",
+    "statusCurrent": "Поточна",
+    "statusArchived": "Архівна",
+    "archivedNotice": "Це архівна версія ({label}), вона може бути застарілою.",
+    "viewCurrent": "Переглянути поточну версію"
   },
   "auth": {
     "login": {

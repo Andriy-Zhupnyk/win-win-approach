@@ -1,21 +1,21 @@
 import { test, expect } from "@playwright/test";
-import en from "../messages/en.json";
 import uk from "../messages/uk.json";
 
+// The home page is the public Information page (spec 0005); its content
+// comes from the seeded GS 0.2 version (see e2e/information.spec.ts).
 const LOCALES = [
-  { code: "en", messages: en },
-  { code: "uk", messages: uk },
+  { code: "en", title: "Win-Win Approach — General Statement" },
+  { code: "uk", title: "Win-Win Approach — Загальна заява" },
 ] as const;
 
-for (const { code, messages } of LOCALES) {
-  test(`home page renders the translated heading (${code})`, async ({
+for (const { code, title } of LOCALES) {
+  test(`home page renders the Information heading (${code})`, async ({
     page,
   }) => {
     await page.goto(`/${code}`);
     await expect(
-      page.getByRole("heading", { name: messages.home.title }),
+      page.getByRole("heading", { name: title, exact: true }),
     ).toBeVisible();
-    await expect(page.getByText(messages.home.subtitle)).toBeVisible();
   });
 }
 
@@ -29,15 +29,14 @@ test("locale switcher changes the page language and persists across navigation",
 }) => {
   await page.goto("/en");
   await expect(
-    page.getByRole("heading", { name: en.home.title }),
+    page.getByRole("heading", { name: LOCALES[0].title, exact: true }),
   ).toBeVisible();
 
   await page.getByRole("link", { name: "UK" }).click();
   await expect(page).toHaveURL("/uk");
   await expect(
-    page.getByRole("heading", { name: uk.home.title }),
+    page.getByRole("heading", { name: LOCALES[1].title, exact: true }),
   ).toBeVisible();
-  await expect(page.getByText(uk.home.subtitle)).toBeVisible();
 
   // The switch to `uk` isn't just a one-off navigation — it must persist
   // when navigating to another page too.

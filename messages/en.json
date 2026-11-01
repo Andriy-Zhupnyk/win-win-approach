@@ -13,9 +13,16 @@
   "localeSwitcher": {
     "label": "Language"
   },
-  "home": {
-    "title": "Win-Win Approach",
-    "subtitle": "Coming soon."
+  "information": {
+    "emptyHeading": "Win-Win Approach",
+    "empty": "No information has been published yet.",
+    "versionHistory": "Version history",
+    "noVersions": "No versions have been published yet.",
+    "publishedOn": "Published {date}",
+    "statusCurrent": "Current",
+    "statusArchived": "Archived",
+    "archivedNotice": "This is an archived version ({label}) and may be out of date.",
+    "viewCurrent": "View the current version"
   },
   "auth": {
     "login": {

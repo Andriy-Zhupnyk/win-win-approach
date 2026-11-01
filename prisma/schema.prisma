@@ -114,8 +114,16 @@ model VerificationToken {
 model InformationVersion {
   id           String             @id @default(cuid())
   versionLabel String
+  // Per-locale content (spec 0005): `title`/`body` hold the English (base)
+  // text; `titleUk`/`bodyUk` hold the optional Ukrainian translation. The
+  // read side falls back to the base text when a translation is missing.
+  // Chosen over two linked rows per version because a version is a single
+  // unit of publish/archive/history, so it stays one row with one status;
+  // the tradeoff is that adding a third locale needs another column pair.
   title        String
   body         String
+  titleUk      String?
+  bodyUk       String?
   status       InformationStatus  @default(DRAFT)
   publishedAt  DateTime?
   authorId     String
