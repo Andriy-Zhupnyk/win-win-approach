@@ -1,0 +1,18 @@
+# Normalize line endings: LF in the repo AND in the working tree, on every OS.
+# Without this, Windows checkouts (core.autocrlf=true) show phantom "modified"
+# files and make agents burn tokens on CRLF noise (see spec 0010).
+* text=auto eol=lf
+
+# Binary assets: never touch line endings.
+*.ico binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.avif binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.pdf binary

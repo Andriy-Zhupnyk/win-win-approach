@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "SubagentStop": [
+      {
+        "matcher": "spec-implementer",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_DIR}/scripts/hooks/verify-on-stop.mjs\"",
+            "timeout": 1200
+          }
+        ]
+      }
+    ]
+  }
+}
