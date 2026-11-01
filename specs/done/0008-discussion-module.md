@@ -1,6 +1,6 @@
 # 0008 — Discussion module
 
-**Status:** Active
+**Status:** Done (merged in #9)
 **Depends on:** 0002, 0003, 0004
 
 ## Context / why
