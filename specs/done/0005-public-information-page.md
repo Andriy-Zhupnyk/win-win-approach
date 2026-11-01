@@ -1,6 +1,6 @@
 # 0005 — Public Information page + version history
 
-**Status:** Active
+**Status:** Done (merged in #6)
 **Depends on:** 0002, 0004
 
 ## Context / why
