@@ -142,6 +142,13 @@ model InformationVersion {
   // 20261101130000_single_published_information_version), guaranteeing at
   // most one PUBLISHED row (spec 0007). Prisma cannot model partial indexes,
   // so it is intentionally absent here; do not drop it.
+  //
+  // Spec 0011 finding (Prisma 6.19.3, scratch Postgres 16): with all
+  // migrations applied, `prisma migrate dev --create-only` and `prisma
+  // migrate diff` on this unchanged schema produce an empty migration, i.e.
+  // Prisma does NOT propose dropping the index, and `@@index(where:)` is not
+  // supported. tests/single-published-index.test.ts fails if the index ever
+  // goes missing after `migrate deploy`.
   @@index([status])
 }
 

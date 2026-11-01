@@ -1,6 +1,6 @@
 # 0011 — Guard the single-PUBLISHED index against Prisma migration drift
 
-**Status:** Backlog
+**Status:** Active
 **Depends on:** 0007
 
 ## Context / why
