@@ -9,10 +9,19 @@ making changes. All feature work is tracked as specs under
 
 ## Current state
 
-Spec `0001-project-scaffold` (the Next.js app skeleton and quality-gate
-pipeline) and spec `0002-core-domain-model` (the Prisma schema, migration,
-and seed data) are done. There is no auth or UI for this data yet — the
-home page is still a placeholder.
+The MVP scope (the _Information_ and _Discussion_ stages) is built; specs
+0001–0011 are done (see `specs/done/`):
+
+- public Information page with version history and archived versions
+- auth with roles (`visitor`, `member`, `expert`, `administrator`) and a
+  personal account area
+- admin panel to manage Information content
+- discussion threads and replies
+- proposals to change the Information content, reviewed by admins
+- Ukrainian and English UI (`next-intl`)
+
+Research, Modelling and Real-World Projects are future stages and are not
+built.
 
 ## Stack
 
@@ -29,8 +38,9 @@ home page is still a placeholder.
 - [Playwright](https://playwright.dev/) for end-to-end tests
 - [GitHub Actions](https://github.com/features/actions) for CI
 
-See `CLAUDE.md` section 2 for the full pinned stack (including pieces not
-installed yet, e.g. Auth.js, which arrives in a later spec).
+Also: [Auth.js](https://authjs.dev/) (NextAuth v5) with the Prisma adapter and
+[next-intl](https://next-intl.dev/). See `CLAUDE.md` section 2 for the full
+pinned stack.
 
 ## Prerequisites
 
@@ -47,11 +57,14 @@ installed yet, e.g. Auth.js, which arrives in a later spec).
 git clone <this-repo-url>
 cd win-win-approach
 
-# 2. Install dependencies (this also installs the Husky git hook via the
-#    "prepare" script, and generates the Prisma client via "postinstall")
-npm install
+# 2. Install dependencies from the lockfile (this also installs the Husky git
+#    hook via the "prepare" script, and generates the Prisma client via
+#    "postinstall"). Use `npm ci`, never plain `npm install`: see CLAUDE.md
+#    section 4.1 (lockfile hygiene).
+npm ci
 
-# 3. Copy the env template and start a local database (see next section)
+# 3. Copy the env template, fill in AUTH_SECRET (see .env.example), and start
+#    a local database (see next section)
 cp .env.example .env.local
 docker compose up -d
 
@@ -89,10 +102,23 @@ Useful commands once the container is running:
 
 ```bash
 npx prisma migrate dev   # create/apply a migration from schema.prisma changes
-npm run db:seed          # populate fixture data (admin/member/expert users,
-                          # one published "GS 0.1" InformationVersion)
+npm run db:seed          # populate fixture data (see below)
 npx prisma studio         # browse the database in a GUI
 ```
+
+`npm run db:seed` is idempotent. It creates:
+
+- three users: `admin@winwinapproach.org` (administrator),
+  `member@winwinapproach.org` (member) and `expert@winwinapproach.org`
+  (expert). They have no password, so they cannot sign in; register an
+  account through the UI to log in.
+- two Information versions: an archived "GS 0.1" and the published "GS 0.2".
+  It also repairs the fixture if an admin published another version since
+  the last seed.
+
+**The e2e tests need this seed**: the Information and home page tests read
+the published "GS 0.2" version. Run `npm run db:seed` before
+`npm run test:e2e` on a fresh database (CI does this too).
 
 For a production/demo deployment, `DATABASE_URL` will instead point at a
 hosted Postgres instance (e.g. [Neon](https://neon.tech/), per `CLAUDE.md`)
@@ -105,25 +131,42 @@ repo configures today.
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) — you should see the
-"Win-Win Approach" placeholder page.
+Open [http://localhost:3000](http://localhost:3000); it redirects to a
+locale (`/uk` or `/en`) and shows the current Information page.
 
 ## Quality gates
 
 These are the same commands CI runs on every push and pull request
 (`.github/workflows/ci.yml`). All must pass before a PR is mergeable
 (see `CLAUDE.md` section 4). `npm run test` includes Prisma integration
-tests and needs a running, migrated local Postgres (`docker compose up -d`
-
-- `npx prisma migrate dev`) — CI provides this via a `postgres:16` service
-  container instead.
+tests and needs a running, migrated local Postgres (`docker compose up -d` and `npx prisma migrate dev`); CI provides this via a
+`postgres:16` service container instead.
 
 ```bash
 npm run lint        # ESLint — zero errors/warnings
 npm run typecheck    # tsc --noEmit (runs `next typegen` first)
 npm run test         # Vitest unit/integration tests (needs DATABASE_URL)
-npm run test:e2e     # Playwright e2e tests (starts its own dev server)
+npm run test:e2e     # Playwright e2e tests (builds and starts its own server)
 npm run build        # production build
+```
+
+`npm run verify` runs lint, typecheck, test and build in order, stops at the
+first failure and prints a one-line result per step. It does not run e2e.
+
+`npm run test:e2e` needs the seeded database (see above) and the Playwright
+browser (`npx playwright install chromium`). It runs against a production
+build (`next build && next start` on port 3100), not `next dev`, so the
+first request to each route is not slowed by on-demand compilation. It
+always starts its own server: stop anything already listening on port 3100.
+
+Dependencies and GitHub steps have dedicated scripts (see `CLAUDE.md`
+sections 4.1 and 9 for the rules; they are not repeated here):
+
+```bash
+npm run deps:add -- <pkg...>     # add a dependency, keeping the lockfile Linux-safe
+npm run deps:remove -- <pkg...>  # remove a dependency
+npm run deps:verify              # Linux `npm ci` against the current lockfile
+node scripts/gh-flow.mjs pr-create | ci-wait | merge-close   # PR/CI/merge steps
 ```
 
 Other useful scripts:
@@ -138,8 +181,10 @@ npm run test:watch    # Vitest in watch mode
 
 ```
 /app                  Next.js App Router routes
-/components           Shared UI components (empty for now)
-/lib                  Server-side helpers (Prisma client singleton, etc.)
+/components           Shared UI components
+/lib                  Server-side helpers (auth, rbac, prisma client, etc.)
+/messages             uk.json, en.json (next-intl)
+/scripts              Harness scripts (verify, deps, gh-flow, hooks)
 /prisma               schema.prisma, migrations/, seed.ts
 /tests                Vitest unit/integration tests (mirrors /app, /lib)
 /e2e                  Playwright end-to-end tests
