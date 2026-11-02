@@ -7,7 +7,7 @@
 // modes (duplicate email, weak password).
 import { randomUUID } from "node:crypto";
 import { PrismaClient, Role } from "@prisma/client";
-import { afterAll, describe, expect, it } from "vitest";
+import { afterAll, describe, expect, it, vi } from "vitest";
 import { registerAction } from "@/app/[locale]/register/actions";
 
 const prisma = new PrismaClient();
@@ -30,6 +30,7 @@ function formDataFor(fields: Record<string, string>) {
 }
 
 afterAll(async () => {
+  vi.unstubAllEnvs();
   await prisma.user.deleteMany({ where: { email: { in: createdEmails } } });
   await prisma.$disconnect();
 });
@@ -96,5 +97,30 @@ describe("registerAction", () => {
 
     const found = await prisma.user.findUnique({ where: { email } });
     expect(found).toBeNull();
+  });
+
+  it("gives MEMBER to any email, even one that looks like an administrator's (spec 0014)", async () => {
+    // No email verification exists, so an address must never grant a role.
+    // Even if a deployment names this address as the owner's (ADMIN_EMAIL is
+    // only read by `npm run admin:create`), the public form yields MEMBER.
+    const ownerLike = emailFor("owner-admin");
+    createdEmails.push(ownerLike);
+    vi.stubEnv("ADMIN_EMAIL", ownerLike);
+
+    const result = await registerAction(
+      {},
+      formDataFor({
+        email: ownerLike,
+        password: "a-strong-enough-password",
+        displayName: "Owner Lookalike",
+      }),
+    );
+    expect(result).toEqual({ success: true });
+
+    const created = await prisma.user.findUniqueOrThrow({
+      where: { email: ownerLike },
+    });
+    expect(created.role).toBe(Role.MEMBER);
+    vi.unstubAllEnvs();
   });
 });

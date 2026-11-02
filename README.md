@@ -111,7 +111,8 @@ npx prisma studio         # browse the database in a GUI
 - three users: `admin@winwinapproach.org` (administrator),
   `member@winwinapproach.org` (member) and `expert@winwinapproach.org`
   (expert). They have no password, so they cannot sign in; register an
-  account through the UI to log in.
+  account through the UI to log in (or run `npm run db:seed:demo` with
+  `DEMO_ACCOUNTS_PASSWORD` set to give the member and expert a login).
 - two Information versions: an archived "GS 0.1" and the published "GS 0.2".
   It also repairs the fixture if an admin published another version since
   the last seed.
@@ -120,10 +121,145 @@ npx prisma studio         # browse the database in a GUI
 the published "GS 0.2" version. Run `npm run db:seed` before
 `npm run test:e2e` on a fresh database (CI does this too).
 
-For a production/demo deployment, `DATABASE_URL` will instead point at a
-hosted Postgres instance (e.g. [Neon](https://neon.tech/), per `CLAUDE.md`)
-— that's a deployment-time decision for a later spec, not something this
-repo configures today.
+The hosted demo is described in "Deploying the demo" below. Two opt-in owner
+scripts exist for it (`npm run admin:create`, `npm run db:seed:demo`); the
+plain `db:seed` still creates no passwords.
+
+## Deploying the demo
+
+The public demo runs on [Vercel](https://vercel.com/) (app) and
+[Neon](https://neon.tech/) (PostgreSQL). Agents only prepare the repository;
+**a human creates the Neon and Vercel projects and types the administrator
+password**. The password must never be sent in chat, committed, put in an
+issue/PR, or passed on a command line.
+
+### Environment variables
+
+Names are listed in `.env.example` (no values). On Vercel set them in the
+dashboard, **Production scope only**:
+
+| Variable       | Value                                                                                         |
+| -------------- | --------------------------------------------------------------------------------------------- |
+| `DATABASE_URL` | Neon **pooled** string (host has `-pooler`) plus `?sslmode=require&pgbouncer=true`            |
+| `AUTH_SECRET`  | a fresh secret: `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"` |
+
+`AUTH_TRUST_HOST` and `AUTH_URL` are **not** needed on Vercel: Auth.js (via
+`@auth/core`) enables `trustHost` automatically when the `VERCEL` variable is
+present. (Behind any other host, set `AUTH_TRUST_HOST=true`.)
+
+### Where migrations run
+
+`prisma migrate deploy` is a **manual step run from the owner's machine**, not
+part of the Vercel build. Reasons: a build that mutates the database would also
+do so for every preview and failed build; migrations need Neon's **direct**
+(non-pooled) connection because they take advisory locks, which PgBouncer's
+pooled connection does not support; and a schema change should be a deliberate
+act, ordered before the deploy that needs it. The Vercel build only runs
+`prisma generate` (via `postinstall`) and `next build`.
+
+### Preview deployments
+
+Previews are **disabled**: `vercel.json` has an `ignoreCommand` that skips every
+build whose `VERCEL_ENV` is not `production`, so a PR never gets a preview
+that could touch the demo database. In addition, never add `DATABASE_URL` or
+`AUTH_SECRET` to the Vercel _Preview_ or _Development_ scopes. If previews are
+wanted later, give them their own Neon branch and a Preview-scoped
+`DATABASE_URL` pointing at it, and remove the `ignoreCommand`.
+
+### First deploy
+
+1. Create the Neon project. Copy both connection strings (pooled and direct)
+   into your password manager.
+2. Create the Vercel project from the GitHub repository (framework: Next.js,
+   production branch: `main`) and set the two variables above in Production.
+3. Migrate the hosted database, from a local shell with the **direct** URL.
+   Read it without echo so it does not enter shell history:
+
+   ```bash
+   read -rs DATABASE_URL && export DATABASE_URL   # paste the direct URL, Enter
+   npx prisma migrate deploy
+   ```
+
+   PowerShell: `$env:DATABASE_URL = Read-Host -MaskInput "direct URL"`
+   (PowerShell 7) and then `npx prisma migrate deploy`.
+
+4. (Optional) load the sample Information content in the same shell:
+   `npm run db:seed`. It also inserts a placeholder `admin@winwinapproach.org`
+   row that has no password and therefore cannot sign in. Skip it to start with
+   an empty Information page and create content in the admin panel instead.
+5. Create the administrator, still in the same shell (an interactive terminal
+   is required; in Git Bash on Windows prefix with `winpty`, or use PowerShell):
+
+   ```bash
+   npm run admin:create -- <administrator-email>
+   ```
+
+   The script requires `DATABASE_URL` to be exported (it does not read `.env`
+   files), prints the database host it will modify, asks you to type `yes`,
+   then asks for the password twice at a hidden prompt (minimum 12
+   characters). The email may also come from `ADMIN_EMAIL` or the prompt. It
+   creates the user, or updates an existing one to `ADMIN` and replaces its
+   password. The password is never printed, logged or stored (only its bcrypt
+   hash, same cost as registration).
+
+6. (Optional) demo logins for the member and expert roles, same shell:
+
+   ```bash
+   read -rs DEMO_ACCOUNTS_PASSWORD && export DEMO_ACCOUNTS_PASSWORD
+   npm run db:seed:demo
+   ```
+
+   This sets the password of `member@winwinapproach.org` and
+   `expert@winwinapproach.org` (creating them if absent). It refuses to run
+   without `DEMO_ACCOUNTS_PASSWORD` and never creates or changes an
+   `ADMIN`; it aborts if either email already belongs to an administrator.
+
+7. Trigger a Vercel production deploy (push to `main`, or redeploy from the
+   dashboard) and run the smoke test below.
+
+Close the shell (or `unset DATABASE_URL DEMO_ACCOUNTS_PASSWORD`) afterwards.
+
+No role is ever granted from an email address: public registration always
+creates a `MEMBER` (there is no email verification), and administrators exist
+only through `npm run admin:create`.
+
+### Later releases
+
+Deploys happen on push to `main`. When a release contains a new migration,
+run `npx prisma migrate deploy` with the direct URL **before** merging it.
+
+### Rotating secrets
+
+- `AUTH_SECRET`: set a new value in Vercel (Production) and redeploy. All
+  sessions are invalidated; users log in again.
+- Administrator password: run `npm run admin:create -- <email>` again; it
+  replaces the password of the existing account.
+- Demo password: export a new `DEMO_ACCOUNTS_PASSWORD` and re-run
+  `npm run db:seed:demo`.
+- Database password: reset the role password in Neon, then update `DATABASE_URL`
+  in Vercel and redeploy.
+
+### Tear down
+
+Delete the Vercel project, then the Neon project (this destroys all data,
+including registered users' emails and password hashes). To delete a single
+user on request, remove their row in Neon's SQL editor or Prisma Studio.
+
+### Smoke test of the deployed site
+
+Manual checklist, on the public URL (a Playwright run against production is
+deliberately not provided, since it would write test data to the demo
+database):
+
+- [ ] `/uk/register` and `/en/register` show the privacy notice.
+- [ ] Register a new account, then log in; the display name appears in the nav.
+- [ ] Create a discussion thread and post a reply.
+- [ ] Open the Information page and its version history, including an
+      archived version.
+- [ ] As a member, submit a proposal; it appears in the proposals list.
+- [ ] Log in as the administrator, review the proposal, publish a version; the
+      Information page shows the new version.
+- [ ] Log out; protected pages redirect to login.
 
 ## Running the app
 

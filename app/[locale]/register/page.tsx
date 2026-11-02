@@ -11,6 +11,18 @@ export default async function RegisterPage() {
         {t("heading")}
       </h1>
       <RegisterForm />
+      <aside
+        aria-labelledby="privacy-notice-heading"
+        className="w-full max-w-sm rounded border border-zinc-300 p-3 text-xs text-zinc-600 dark:border-zinc-700 dark:text-zinc-400"
+      >
+        <h2
+          id="privacy-notice-heading"
+          className="mb-1 font-semibold text-zinc-800 dark:text-zinc-200"
+        >
+          {t("privacy.heading")}
+        </h2>
+        <p>{t("privacy.body")}</p>
+      </aside>
       <p className="text-sm text-zinc-600 dark:text-zinc-400">
         {t("haveAccount")}{" "}
         <Link href="/login" className="underline">
