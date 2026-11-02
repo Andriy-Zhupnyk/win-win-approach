@@ -134,6 +134,34 @@
       "note": "Review note (optional, visible to the submitter)",
       "accept": "Accept",
       "reject": "Reject"
+    },
+    "usersLink": "Manage users",
+    "users": {
+      "heading": "Users",
+      "back": "Back to admin",
+      "email": "Email",
+      "displayName": "Display name",
+      "role": "Role",
+      "registered": "Registered",
+      "changeRole": "Change role",
+      "roleSelect": "New role",
+      "save": "Change role",
+      "saved": "Role updated.",
+      "capped": "Showing the {count} most recent users.",
+      "roles": {
+        "MEMBER": "Member",
+        "EXPERT": "Expert",
+        "ADMIN": "Administrator"
+      },
+      "errors": {
+        "unauthorized": "You must be logged in to do this.",
+        "forbidden": "You do not have permission to do this.",
+        "ownRole": "You cannot change your own role.",
+        "lastAdmin": "The last administrator cannot be demoted.",
+        "invalidRole": "Choose a valid role.",
+        "userNotFound": "This user no longer exists.",
+        "conflict": "The change conflicted with another one. Reload and try again."
+      }
     }
   },
   "discussion": {
