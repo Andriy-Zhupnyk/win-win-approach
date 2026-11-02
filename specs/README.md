@@ -64,6 +64,8 @@ A good spec:
 | 0011 | Guard single-PUBLISHED index vs. drift    | 0007             |
 | 0012 | E2E reliability and README refresh        | 0009, 0010       |
 | 0013 | Logout not undone by in-flight requests   | 0003, 0012       |
+| 0014 | Demo deployment and demo accounts         | 0003, 0005, 0012 |
+| 0015 | Role management UI                        | 0003, 0007, 0014 |
 
 0001–0004 are foundation work and should be done in roughly that order before
 any MVP feature spec starts, since every later spec depends on at least one
