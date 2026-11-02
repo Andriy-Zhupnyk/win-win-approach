@@ -49,6 +49,10 @@
       "submitting": "Creating account…",
       "success": "Account created. You can now",
       "loginNow": "log in",
+      "privacy": {
+        "heading": "Privacy notice",
+        "body": "This is a demonstration site. If you register we store your email address, your display name and a hash of your password (never the password itself). Do not use a password you use elsewhere. Your email address is not verified and is not used to send any messages. To have your account and data deleted, ask the administrator who gave you the link to this demo."
+      },
       "errors": {
         "displayNameRequired": "Enter a display name.",
         "invalidEmail": "Enter a valid email address.",

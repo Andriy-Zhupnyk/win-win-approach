@@ -20,7 +20,9 @@
     "prepare": "husky",
     "postinstall": "prisma generate",
     "db:seed": "tsx prisma/seed.ts",
-    "db:migrate": "prisma migrate dev"
+    "db:seed:demo": "tsx scripts/seed-demo.ts",
+    "db:migrate": "prisma migrate dev",
+    "admin:create": "tsx scripts/admin-create.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.3",

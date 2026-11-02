@@ -4,6 +4,7 @@ import { hash } from "bcryptjs";
 import { Role } from "@prisma/client";
 import { createTranslator, hasLocale } from "next-intl";
 import { prisma } from "@/lib/prisma";
+import { BCRYPT_COST, MIN_PASSWORD_LENGTH } from "@/lib/password-hash";
 import { routing, type AppLocale } from "@/i18n/routing";
 import en from "@/messages/en.json";
 import uk from "@/messages/uk.json";
@@ -11,13 +12,15 @@ import uk from "@/messages/uk.json";
 export type RegisterState = { error?: string; success?: boolean };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const MIN_PASSWORD_LENGTH = 8;
 
 const MESSAGES: Record<AppLocale, typeof en> = { en, uk };
 
 /**
  * Registers a new visitor as a `MEMBER` (spec 0003 — `visitor` is never a
- * stored role). Deliberately does not sign the user in: the spec's test
+ * stored role). The role is always `MEMBER`, whatever the email address:
+ * there is no email verification, so nothing here (or anywhere) may grant a
+ * role based on an unverified address (spec 0014). Administrators come only
+ * from `npm run admin:create`. Deliberately does not sign the user in: the spec's test
  * plan treats register and login as separate steps.
  *
  * Spec 0004: validation/conflict messages are translated. The locale comes
@@ -73,7 +76,7 @@ export async function registerAction(
     return { error: t("emailTaken") };
   }
 
-  const passwordHash = await hash(password, 12);
+  const passwordHash = await hash(password, BCRYPT_COST);
 
   await prisma.user.create({
     data: {
