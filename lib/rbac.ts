@@ -74,6 +74,35 @@ export function requireRole(
 }
 
 /**
+ * Like `requireRole`, but decides on the role currently stored in the
+ * database instead of the one frozen in the JWT at sign-in (spec 0015).
+ * Use it for privileged operations (everything under `/admin`) so that a
+ * role change takes effect on the user's next request rather than at their
+ * next login. A user deleted since sign-in is treated as logged out.
+ */
+export async function requireFreshRole(
+  session: SessionLike,
+  allowedRoles: readonly Role[],
+): Promise<{ id: string; role: Role }> {
+  // Fails fast with UnauthorizedError when there is no session at all.
+  const { id } = requireRole(session, ROLES);
+  // Deferred import, same rationale as requirePageRole below: keeps the
+  // pure helpers importable without a database client.
+  const { prisma } = await import("@/lib/prisma");
+  const user = await prisma.user.findUnique({
+    where: { id },
+    select: { role: true },
+  });
+  if (!user) {
+    throw new UnauthorizedError();
+  }
+  return requireRole(
+    { user: { ...session!.user!, role: user.role } },
+    allowedRoles,
+  );
+}
+
+/**
  * Page-level counterpart of `requireRole`, for Server Components (e.g.
  * app/admin/page.tsx). Reads the session itself and redirects instead of
  * throwing — a redirect, not a crash, is what the spec asks for — but the
@@ -84,7 +113,10 @@ export function requireRole(
  * unauthenticated/wrong-role requests away from these routes, but per spec
  * 0003 the route itself must not rely on middleware alone.
  */
-export async function requirePageRole(allowedRoles: readonly Role[]) {
+export async function requirePageRole(
+  allowedRoles: readonly Role[],
+  options: { fresh?: boolean } = {},
+) {
   // Deferred import: lib/auth.ts pulls in next-auth's full runtime (and
   // transitively bcrypt/Prisma), which only resolves cleanly inside
   // Next.js's own module graph — not under Vitest. Deferring it here keeps
@@ -93,7 +125,11 @@ export async function requirePageRole(allowedRoles: readonly Role[]) {
   const { auth } = await import("@/lib/auth");
   const session = await auth();
   try {
-    return requireRole(session, allowedRoles);
+    // `fresh` re-reads the role from the database (spec 0015), see
+    // `requireFreshRole`.
+    return options.fresh
+      ? await requireFreshRole(session, allowedRoles)
+      : requireRole(session, allowedRoles);
   } catch (error) {
     if (error instanceof UnauthorizedError || error instanceof ForbiddenError) {
       // Deferred imports, same rationale as lib/auth.ts above: both of

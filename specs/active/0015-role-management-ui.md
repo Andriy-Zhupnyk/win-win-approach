@@ -1,6 +1,6 @@
 # 0015 — Role management UI
 
-**Status:** Backlog
+**Status:** Active
 **Depends on:** 0003, 0007, 0014
 
 ## Context / why

@@ -15,7 +15,7 @@ import {
 } from "@/lib/information-limits";
 import { REVIEW_NOTE_MAX_LENGTH } from "@/lib/proposal-limits";
 import { ProposalNotPendingError, reviewProposal } from "@/lib/proposals";
-import { requireRole, UnauthorizedError } from "@/lib/rbac";
+import { requireFreshRole, UnauthorizedError } from "@/lib/rbac";
 import { routing, type AppLocale } from "@/i18n/routing";
 import en from "@/messages/en.json";
 import uk from "@/messages/uk.json";
@@ -67,7 +67,9 @@ async function requireAdmin(
   const { auth } = await import("@/lib/auth");
   const session = await auth();
   try {
-    return requireRole(session, ["ADMIN"]);
+    // Spec 0015: re-read the role from the database, so a demoted admin's
+    // still-valid JWT cannot keep using admin actions.
+    return await requireFreshRole(session, ["ADMIN"]);
   } catch (error) {
     return {
       error:

@@ -13,7 +13,7 @@ import { requirePageRole } from "@/lib/rbac";
 export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
-  await requirePageRole(["ADMIN"]);
+  await requirePageRole(["ADMIN"], { fresh: true });
   const t = await getTranslations("admin");
   const format = await getFormatter();
   const [versions, proposals] = await Promise.all([
@@ -26,6 +26,9 @@ export default async function AdminPage() {
       <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
         {t("heading")}
       </h1>
+      <Link href="/admin/users" className="text-sm underline">
+        {t("usersLink")}
+      </Link>
 
       <section className="flex flex-col gap-4">
         <h2 className="text-xl font-semibold">{t("form.heading")}</h2>
