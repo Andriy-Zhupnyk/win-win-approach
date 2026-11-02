@@ -1,6 +1,6 @@
 # 0014 — Demo deployment and demo accounts
 
-**Status:** Active
+**Status:** Done (merged in #14)
 **Depends on:** 0003, 0005, 0012
 
 ## Context / why
