@@ -1,6 +1,6 @@
 # 0015 — Role management UI
 
-**Status:** Active
+**Status:** Done (merged in #15)
 **Depends on:** 0003, 0007, 0014
 
 ## Context / why
